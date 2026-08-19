@@ -499,8 +499,56 @@ a:focus-visible {
   .progress-heading { align-items: flex-start; flex-direction: column; gap: 5px; }
   .progress-actions { align-items: flex-start; }
   .save-status { max-width: 70%; }
-  .month { margin-top: 16px; border-radius: 22px; }
-  .month h2 { position: sticky; left: 0; }
+  .month {
+    margin-top: 16px;
+    padding: 20px 12px 14px;
+    overflow: visible;
+    border-radius: 22px;
+  }
+  .month h2 { margin: 0 6px 15px; font-size: 1.75rem; }
+  .grid { min-width: 0; gap: 4px; }
+  .dow {
+    padding: 3px 0 7px;
+    font-size: .52rem;
+    letter-spacing: .04em;
+  }
+  .day,
+  .blank {
+    min-height: 78px;
+    border-radius: 9px;
+  }
+  .day { align-items: center; padding: 5px 3px; }
+  .top { width: 100%; justify-content: center; }
+  .num { width: 24px; height: 24px; font-size: .86rem; }
+  .todaylabel { display: none; }
+  .event {
+    width: 100%;
+    margin-top: 5px;
+    padding: 2px 0;
+    font-size: 0;
+    text-align: center;
+  }
+  .event::after { content: attr(data-short); font-size: .78rem; }
+  .checkrow { justify-content: center; margin-top: auto; padding-top: 4px; }
+  .checkrow span { display: none; }
+  .checkrow input { width: 14px; height: 14px; }
+  .lockmsg,
+  .missedmsg {
+    margin-top: auto;
+    font-size: 0;
+    text-align: center;
+  }
+  .lockmsg::after { content: "🔒"; font-size: .62rem; opacity: .7; }
+  .missedmsg::after { content: "·"; font-size: .9rem; }
+  .surprise-again {
+    align-self: center;
+    margin-top: auto;
+    padding: 3px 5px;
+    font-size: 0;
+  }
+  .surprise-again::after { content: "📖"; font-size: .68rem; }
+  .departure { margin-top: auto; font-size: 0; }
+  .departure::after { content: "✈️"; font-size: .72rem; }
   .note { padding-inline: 8px; }
   .surprise-modal { padding: 12px; }
   .surprise-box { max-height: 90vh; border-radius: 20px; }
