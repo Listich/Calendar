@@ -1,4 +1,43 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#173f4f">
+  <title>Cap sur Los Angeles — Calendrier 2026</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="page-shell">
+  <header class="hero">
+    <div class="hero-copy">
+      <p class="eyebrow">Carnet de voyage · 2026</p>
+      <h1>Cap sur<br><em>Los Angeles</em></h1>
+      <p class="hero-intro">Un été d’aventures, une surprise par jour et une destination en ligne de mire.</p>
+    </div>
+    <div class="hero-stamp" aria-hidden="true">
+      <span>TOULOUSE</span>
+      <strong>→</strong>
+      <span>LOS ANGELES</span>
+    </div>
+    <div class="countdown" id="countdown" aria-live="polite">Calcul du départ…</div>
+  </header>
 
+  <main class="container">
+    <section class="card progress-card" aria-labelledby="progress-title">
+      <div class="progress-heading">
+        <div>
+          <p class="section-kicker">Le rituel du matin</p>
+          <h2 id="progress-title">Ma progression</h2>
+        </div>
+        <p class="stats" id="stats" aria-live="polite">Chargement…</p>
+      </div>
+      <div class="progress-track" aria-hidden="true"><div class="progress-bar" id="bar"></div></div>
+      <div class="progress-actions">
+        <span id="saveStatus" class="save-status" aria-live="polite">Chargement de la sauvegarde…</span>
+        <button id="reset" class="reset-button" type="button">Réinitialiser</button>
+      </div>
+    </section>
 
 <section class="card dates">
   <h2>📌 Dates importantes</h2>
@@ -21,6 +60,7 @@
 <p class="note">
 Comme un calendrier de l’Avent : chaque case se débloque uniquement le jour même. Quand tu la coches, une surprise culturelle ou intellectuelle apparaît 🎁. Les jours futurs restent verrouillés 🔒 et les cases cochées sont sauvegardées dans Safari.
 </p>
+</main>
 </div>
 
 <div class="surprise-modal" id="surpriseModal" role="dialog" aria-modal="true" aria-labelledby="surpriseTitle">
@@ -32,15 +72,6 @@ Comme un calendrier de l’Avent : chaque case se débloque uniquement le jour m
   </div>
 </div>
 
-<style>
-.confetti-container{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:9999;}
-.confetti-piece{position:absolute;top:-12px;border-radius:2px;opacity:0.95;animation:confetti-fall linear forwards;}
-@keyframes confetti-fall{
-  0%{transform:translateY(0) rotate(0deg);opacity:1;}
-  85%{opacity:1;}
-  100%{transform:translateY(105vh) rotate(650deg);opacity:0;}
-}
-</style>
 <script>
 (function() {
   const trip = new Date(2026,9,20);
@@ -97,15 +128,21 @@ Comme un calendrier de l’Avent : chaque case se débloque uniquement le jour m
     surpriseTitle.textContent = item.title;
     surpriseText.innerHTML = item.article || "<p>Contenu indisponible.</p>";
     surpriseModal.classList.add("show");
+    document.body.classList.add("modal-open");
+    surpriseClose.focus();
   }
 
   function hideSurprise() {
     surpriseModal.classList.remove("show");
+    document.body.classList.remove("modal-open");
   }
 
   surpriseClose.addEventListener("click", hideSurprise);
   surpriseModal.addEventListener("click", function(e) {
     if (e.target === surpriseModal) hideSurprise();
+  });
+  document.addEventListener("keydown", function(e) {
+    if (e.key === "Escape" && surpriseModal.classList.contains("show")) hideSurprise();
   });
 
 
@@ -147,9 +184,12 @@ Comme un calendrier de l’Avent : chaque case se débloque uniquement le jour m
   function enforceAdventRules() {
     const todayKey = getTodayKey();
 
+    document.querySelectorAll(".todaylabel").forEach(el => el.remove());
+
     boxes.forEach(b => {
       const day = b.closest(".day");
       const key = b.dataset.key;
+      day.classList.toggle("today", key === todayKey);
 
       // Remove any old messages/buttons first.
       day.querySelectorAll(".lockmsg,.missedmsg,.surprise-again").forEach(el => el.remove());
@@ -157,6 +197,10 @@ Comme un calendrier de l’Avent : chaque case se débloque uniquement le jour m
       if (key === todayKey) {
         b.disabled = false;
         day.classList.remove("locked","missed");
+        const label = document.createElement("span");
+        label.className = "todaylabel";
+        label.textContent = "Aujourd’hui";
+        day.querySelector(".top").appendChild(label);
       } else if (key > todayKey) {
         b.disabled = true;
         day.classList.add("locked");
@@ -233,13 +277,18 @@ Comme un calendrier de l’Avent : chaque case se débloque uniquement le jour m
 
   async function readIndexedDB() {
     try {
-      const db = await openDB();
-      return await new Promise((resolve, reject) => {
-        const tx = db.transaction(STORE_NAME, "readonly");
-        const req = tx.objectStore(STORE_NAME).get(STORAGE_KEY);
-        req.onsuccess = () => resolve(req.result || null);
-        req.onerror = () => reject(req.error);
-      });
+      return await Promise.race([
+        (async function() {
+          const db = await openDB();
+          return await new Promise((resolve, reject) => {
+            const tx = db.transaction(STORE_NAME, "readonly");
+            const req = tx.objectStore(STORE_NAME).get(STORAGE_KEY);
+            req.onsuccess = () => resolve(req.result || null);
+            req.onerror = () => reject(req.error);
+          });
+        })(),
+        new Promise(resolve => setTimeout(() => resolve(null), 1200))
+      ]);
     } catch(e) {
       return null;
     }
